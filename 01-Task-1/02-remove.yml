@@ -1,0 +1,21 @@
+---
+- name: Playbook for erasing results of first playbook running
+  hosts: servers
+  become: yes
+
+  tasks:
+  - name: Remove httpd on remote hosts
+    yum:
+      name: httpd
+      state: absent
+
+  - name: Removing index.html
+    file:
+      path: /var/www/html/index.html
+      state: absent
+
+  - name: Deny access to tcp port 80
+    firewalld:
+      port: 80/tcp
+      immediate: yes
+      state: disabled

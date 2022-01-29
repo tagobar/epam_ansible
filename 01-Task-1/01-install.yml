@@ -1,0 +1,24 @@
+---
+- name: Playbook for installing httpd, creating specific index.html and adding firewall rule
+  hosts: servers
+  become: yes
+
+  tasks:
+  - name: Install httpd on remote hosts
+    yum:
+      name: httpd
+      state: latest
+
+  - name: Run httpd systemd unit
+    systemd: name=httpd state=started enabled=true
+
+  - name: Creating custom default index.html with specific content
+    copy:
+      dest: /var/www/html/index.html
+      content: "Welcome to my web server"
+
+  - name: Allow access to tcp port 80 by firewall rule
+    firewalld:
+      port: 80/tcp
+      immediate: yes
+      state: enabled

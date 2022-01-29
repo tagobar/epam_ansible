@@ -1,0 +1,27 @@
+---
+- name: Playbook for changing default grub file content
+  hosts: servers
+  become: yes
+  vars:
+    grub_path: /etc/default/grub
+
+  tasks:
+  - name: Adding parameter 'net.ifnames=0' to {{grub_path}} if needed
+    lineinfile:
+      path: "{{grub_path}}"
+      regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\bnet\.ifnames=0\b).*)(")$'
+      line: '\1 net.ifnames=0\2'
+      backrefs: true
+    register: first_param
+
+  - name: Adding parameter 'biosdevname=0' to {{grub_path}} if needed
+    lineinfile:
+      path: "{{grub_path}}"
+      regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\bbiosdevname=0\b).*)(")$'
+      line: '\1 biosdevname=0\2'
+      backrefs: true
+    register: second_param
+
+  - name: Run grub2-mkconfig if at least one of parameters has been added
+    shell: grub2-mkconfig -o /boot/grub2/grub.cfg
+    when: first_param.changed or second_param.changed
