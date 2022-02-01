@@ -1,0 +1,6 @@
+[servers]
+node1.example.com
+node2.example.com
+
+[all:children]
+servers
